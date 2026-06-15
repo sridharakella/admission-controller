@@ -1,0 +1,35 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+CLAUDE.md
+DEPLOYMENT.md
+
+# Build artifacts
+admission-controller
+*.exe
+*.test
+
+# Kubernetes manifests
+deploy/
+scripts/
+
+# Certificates
+certs/
+*.crt
+*.key
+*.csr
+*.pem
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

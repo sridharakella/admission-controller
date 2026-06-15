@@ -1,0 +1,39 @@
+# This file uses cert-manager to automatically generate and manage TLS certificates
+# Requires cert-manager to be installed in the cluster
+# Install with: kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.13.0/cert-manager.yaml
+
+---
+# Self-signed issuer for development/testing
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: selfsigned-issuer
+  namespace: admission-controller
+spec:
+  selfSigned: {}
+---
+# Certificate resource - cert-manager will create the secret automatically
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: admission-controller-tls
+  namespace: admission-controller
+spec:
+  secretName: admission-controller-tls
+  duration: 8760h # 1 year
+  renewBefore: 720h # 30 days
+  isCA: false
+  privateKey:
+    algorithm: RSA
+    size: 2048
+  usages:
+    - server auth
+    - client auth
+  dnsNames:
+    - admission-controller
+    - admission-controller.admission-controller
+    - admission-controller.admission-controller.svc
+    - admission-controller.admission-controller.svc.cluster.local
+  issuerRef:
+    name: selfsigned-issuer
+    kind: Issuer

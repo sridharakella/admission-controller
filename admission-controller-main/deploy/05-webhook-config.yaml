@@ -1,0 +1,36 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: admission-controller-webhook
+  annotations:
+    # If using cert-manager, this annotation will automatically inject the CA bundle
+    cert-manager.io/inject-ca-from: admission-controller/admission-controller-tls
+webhooks:
+  - name: sidecar-injector.admission-controller.svc
+    clientConfig:
+      service:
+        name: admission-controller
+        namespace: admission-controller
+        path: "/mutate"
+        port: 443
+      # caBundle will be automatically injected by cert-manager if using the annotation above
+      # If not using cert-manager, you need to manually set this to the base64-encoded CA certificate
+      # caBundle: <base64-encoded-ca-cert>
+    rules:
+      - operations: ["CREATE"]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+        scope: "*"
+    admissionReviewVersions: ["v1", "v1beta1"]
+    sideEffects: None
+    timeoutSeconds: 10
+    failurePolicy: Ignore  # Change to "Fail" for stricter enforcement in production
+    namespaceSelector:
+      matchExpressions:
+        # Don't intercept kube-system and admission-controller namespace
+        - key: kubernetes.io/metadata.name
+          operator: NotIn
+          values:
+            - kube-system
+            - admission-controller
